@@ -44,8 +44,8 @@ outputs/figures/decision1/ — Figures from Decision 1
 ## Key methodological decisions already made
 
 ### Distribution fitting (Notebook 01)
-- **Three distribution families**: Beta (primary), Triangular, Uniform (maximum-entropy / most dispersed)
-- **Three quantile interpretations** for what vendor min/max represent:
+- **Three distribution families**: Triangular (primary), Uniform (maximum-entropy / most dispersed), Beta (robustness comparison only)
+- **Three quantile interpretations** for what vendor min/max represent (relevant to Beta only):
   - `order_statistic`: min/max as expected extremes of 13 draws (quantiles at 1/14 and 13/14)
   - `quantile_approx`: min/max as approximate percentiles (1/(k+1) and k/(k+1))
   - `extremes`: min/max as true support bounds (widest interpretation)

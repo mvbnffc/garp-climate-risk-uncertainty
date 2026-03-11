@@ -1,0 +1,26 @@
+# Figures / outputs
+outputs/figures/
+
+# Data (processed outputs ok to exclude; raw data kept)
+data/processed/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environments
+.env
+*.env
+env/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db

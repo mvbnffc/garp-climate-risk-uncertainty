@@ -457,7 +457,7 @@ def fit_all_distributions(
 def sample_vendor_uncertainty(
     df: pd.DataFrame,
     fit_results: pd.DataFrame,
-    distribution: Literal["beta", "triangular", "uniform"] = "beta",
+    distribution: Literal["beta", "triangular", "uniform"] = "triangular",
     n_samples: int = 10000,
     correlation: Literal["independent", "perfectly_correlated"] = "independent",
     min_col: str = "minimum_dr",

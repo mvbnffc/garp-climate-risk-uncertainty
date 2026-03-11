@@ -39,20 +39,23 @@ distribution_fitting:
       # For Triangular: min and max define the support directly
       # For Uniform: min and max ARE the distribution
 
+  # Primary distribution for simulation — used in all downstream notebooks
+  primary_distribution: "triangular"
+
   # Distribution families to fit
   distributions:
-    beta:
-      enabled: true
-      description: "Beta distribution on [0,1], fitted via quantile matching"
-      fitting_method: "quantile_matching"  # scipy.optimize
     triangular:
       enabled: true
-      description: "Triangular distribution, mode derived from mean"
+      description: "Triangular distribution (primary) — mode derived from mean-matching: mode = 3*mean - min - max"
       fitting_method: "moment_matching"    # mode = 3*mean - min - max
     uniform:
       enabled: true
-      description: "Uniform on [min, max] — maximum-entropy / most dispersed"
+      description: "Uniform on [min, max] — maximum-entropy / most dispersed; robustness check"
       fitting_method: "direct"             # no fitting needed
+    beta:
+      enabled: true
+      description: "Beta distribution on [0,1], fitted via quantile matching; robustness check only"
+      fitting_method: "quantile_matching"  # scipy.optimize
 
 # --- Portfolio construction (Notebook 02) ---
 portfolio:
