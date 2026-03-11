@@ -1,0 +1,99 @@
+# =============================================================================
+# Climate Risk Uncertainty — Master Configuration
+# =============================================================================
+
+# --- Data source ---
+data:
+  source: "CFRF/GARP Benchmarking Study 2025"
+  scenario: "RP200_2030_defended_combined"
+  n_vendors: 13
+  n_properties: 100
+  raw_file: "data/raw/cfrf_garp_defended_flood.csv"
+
+# --- Distribution fitting (Notebook 01) ---
+distribution_fitting:
+
+  # Properties where all vendors report zero damage
+  # Excluded from uncertainty fitting; re-added at portfolio stage as point mass at 0
+  zero_damage_handling: "exclude_and_readd"
+
+  # Quantile interpretation of min/max across vendors
+  # We test multiple interpretations:
+  #   "order_statistic" — min/max are expected extremes of 13 draws from the true distribution
+  #   "quantile_approx" — treat as 1/(k+1) and k/(k+1) quantiles, k=13
+  #   "extremes"        — treat as true support bounds (most conservative spread)
+  quantile_interpretations:
+    order_statistic:
+      description: "Min/max as expected order statistics of 13 vendor draws"
+      # For k=13, E[min] ≈ F^{-1}(1/(k+1)), E[max] ≈ F^{-1}(k/(k+1))
+      # but corrected for order statistic bias
+      lower_quantile: 0.0538  # E[U_(1:13)] = 1/14
+      upper_quantile: 0.9462  # E[U_(13:13)] = 13/14
+    quantile_approx:
+      description: "Min/max as approximate percentiles"
+      lower_quantile: 0.071   # 1/(13+1)
+      upper_quantile: 0.929   # 13/(13+1)
+    extremes:
+      description: "Min/max as true support bounds (widest interpretation)"
+      # For Beta: fit with min as lower bound, max as upper bound
+      # For Triangular: min and max define the support directly
+      # For Uniform: min and max ARE the distribution
+
+  # Distribution families to fit
+  distributions:
+    beta:
+      enabled: true
+      description: "Beta distribution on [0,1], fitted via quantile matching"
+      fitting_method: "quantile_matching"  # scipy.optimize
+    triangular:
+      enabled: true
+      description: "Triangular distribution, mode derived from mean"
+      fitting_method: "moment_matching"    # mode = 3*mean - min - max
+    uniform:
+      enabled: true
+      description: "Uniform on [min, max] — maximum-entropy / most dispersed"
+      fitting_method: "direct"             # no fitting needed
+
+# --- Portfolio construction (Notebook 02) ---
+portfolio:
+  n_loans: 100    # 1:1 with CFRF properties for now
+  ead:
+    distribution: "uniform"
+    params: {low: 0.5, high: 5.0}    # £m
+    # Alternative: fixed at 1.0 for equal-weighted
+  maturity:
+    distribution: "uniform_int"
+    params: {low: 5, high: 25}        # years
+  baseline_pd_12m:
+    distribution: "lognormal"
+    params: {mu: -5.5, sigma: 0.8}    # median ~0.4%, range ~0.05%–2%
+  baseline_lgd:
+    distribution: "uniform"
+    params: {low: 0.20, high: 0.45}   # secured lending range
+  random_seed: 42
+
+# --- Credit risk mapping (Decision 1) ---
+decision1_credit_risk:
+  # Hazard-to-credit transmission parameters
+  alpha: 2.0          # PD sensitivity: PD = PD_0 * exp(alpha * d)
+  lambda_lgd: 0.25    # LGD sensitivity: LGD = LGD_0 + lambda * d
+
+  # IFRS 9 staging
+  sicr_threshold: 2.0  # SICR if lifetime PD ratio > threshold (EBA benchmark)
+
+  # ECL calculation
+  ecl_method: "simple"  # "simple" or "discounted_marginal"
+  discount_rate: 0.03   # only used if ecl_method == "discounted_marginal"
+
+  # Simulation
+  n_simulations: 10000
+  correlation_scenarios:
+    - "independent"       # independent vendor draws across properties
+    - "perfectly_correlated"  # single quantile draw for all properties
+  random_seed: 123
+
+  # Sensitivity ranges
+  sensitivity:
+    alpha_range: [0.5, 1.0, 2.0, 3.0, 5.0]
+    lambda_range: [0.1, 0.25, 0.5, 0.75]
+    sicr_threshold_range: [1.5, 2.0, 2.5, 3.0]
