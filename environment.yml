@@ -1,0 +1,15 @@
+name: garp-climate-risk
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib
+  - seaborn
+  - pyyaml
+  - jupyter
+  - ipykernel
+  - nb_conda_kernels
