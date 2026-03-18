@@ -13,3 +13,4 @@ dependencies:
   - jupyter
   - ipykernel
   - nb_conda_kernels
+  - SALib # sensitivity analysis
