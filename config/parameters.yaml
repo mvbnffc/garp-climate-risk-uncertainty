@@ -190,6 +190,7 @@ decision1_credit_risk:
   # =========================================================================
 
   reduced_form:
+    pd_functional_form: "linear"  # "exponential": PD_0 * exp(α*d)  |  "linear": PD_0 * (1 + α*d)
     alpha: 2.0          # PD sensitivity to damage ratio
     lambda_lgd: 0.25    # LGD sensitivity to damage ratio
 

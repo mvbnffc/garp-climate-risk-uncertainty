@@ -312,13 +312,54 @@ def sicr_damage_threshold(
 
 # ── Reduced-form (sensitivity) model ────────────────────────────────────────
 
-def reduced_form_pd(pd_0: np.ndarray, d: np.ndarray, alpha: float) -> np.ndarray:
+def reduced_form_pd(
+    pd_0: np.ndarray,
+    d: np.ndarray,
+    alpha: float,
+    functional_form: str = "exponential",
+) -> np.ndarray:
     """
-    Stressed PD under reduced-form model: PD_12m(d) = PD_0 × exp(α × d).
+    Stressed PD under the reduced-form model. Clipped to 1.0.
 
-    Clipped to 1.0.
+    Two functional forms are supported (controlled by ``functional_form``):
+
+    ``"exponential"`` (default):
+        PD_12m(d) = PD_0 × exp(α × d)
+        Convex and unbounded in α; standard ad-hoc choice in the literature.
+
+    ``"linear"``:
+        PD_12m(d) = PD_0 × (1 + α × d)
+        Affine scaling; always gives PD_12m(0) = PD_0 and PD_12m(1) = PD_0×(1+α).
+        More transparent sensitivity: α is the fractional PD uplift per unit damage.
+
+    Parameters
+    ----------
+    pd_0 : array-like
+        Baseline 12-month PD (per loan).
+    d : array-like
+        Damage ratio.
+    alpha : float
+        Sensitivity parameter.
+    functional_form : {"exponential", "linear"}
+        Which functional form to apply.
+
+    Returns
+    -------
+    np.ndarray of stressed PD values clipped to [0, 1].
     """
-    return np.minimum(np.asarray(pd_0) * np.exp(alpha * np.asarray(d)), 1.0)
+    pd_0 = np.asarray(pd_0, dtype=float)
+    d    = np.asarray(d,    dtype=float)
+
+    if functional_form == "exponential":
+        stressed = pd_0 * np.exp(alpha * d)
+    elif functional_form == "linear":
+        stressed = pd_0 * (1.0 + alpha * d)
+    else:
+        raise ValueError(
+            f"Unknown functional_form '{functional_form}'. "
+            "Choose 'exponential' or 'linear'."
+        )
+    return np.minimum(stressed, 1.0)
 
 
 def reduced_form_lgd(lgd_0: np.ndarray, d: np.ndarray, lambda_lgd: float) -> np.ndarray:
