@@ -70,7 +70,7 @@ portfolio:
 
   maturity:
     distribution: "uniform_int"
-    params: {low: 5, high: 25}        # years
+    params: {low: 3, high: 15}        # years
 
   # --- Only used by reduced-form sensitivity model ---
   ead:
@@ -78,10 +78,10 @@ portfolio:
     params: {low: 0.5, high: 5.0}     # £m (for reduced-form model)
   baseline_pd_12m:
     distribution: "lognormal"
-    params: {mu: -5.5, sigma: 0.8}    # median ~0.4% (for reduced-form model)
+    params: {mu: -5.1, sigma: 1.0}    # median ~0.6% (for reduced-form model)
   baseline_lgd:
     distribution: "uniform"
-    params: {low: 0.20, high: 0.45}   # (for reduced-form model)
+    params: {low: 0.10, high: 0.35}   # (for reduced-form model)
 
   random_seed: 42
 
