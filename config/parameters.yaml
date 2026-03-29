@@ -245,3 +245,46 @@ decision1_credit_risk:
     lambda_range: [0.1, 0.25, 0.5, 0.75]
     # Common to both models
     sicr_threshold_range: [1.5, 2.0, 2.5, 3.0]
+
+# --- Secured lending underwriting (Decision 2) ---
+decision2_secured_lending:
+
+  # =========================================================================
+  # Basel III SA CRE underwriting — LTV-bucketed risk weights
+  #
+  # Transmission chain:
+  #   damage_ratio (d)
+  #     → impaired collateral: V_iv = V_i0 × (1 − θ × d)
+  #     → current LTV:         LTV_iv = Loan_i / V_iv
+  #     → outcome bucket:      0 = standard (LTV ≤ LTV̄₁)
+  #                            1 = conditional (LTV̄₁ < LTV ≤ LTV̄₂)
+  #                            2 = reject (LTV > LTV̄₂)
+  #     → risk weight:         RW(outcome)
+  #     → RWA / capital:       Loan × RW × capital_ratio
+  #
+  # Two LTV cliffs (vs. one SICR cliff in Decision 1).
+  # No PD/LGD model — transmission purely through collateral value.
+  # =========================================================================
+
+  # Basel III SA CRE underwriting thresholds
+  ltv_thresholds:
+    ltv_bar_1: 0.60   # approve at standard terms if LTV <= this
+    ltv_bar_2: 0.80   # conditional approval if LTV <= this; reject above
+
+  # Basel III SA CRE risk weights by LTV band
+  risk_weights:
+    rw_standard: 0.60     # LTV <= ltv_bar_1
+    rw_conditional: 0.75  # ltv_bar_1 < LTV <= ltv_bar_2
+    rw_reject: 1.05       # LTV > ltv_bar_2
+
+  # Damage-to-collateral pass-through
+  # theta=1.0: full pass-through (£1 of damage reduces collateral by £1)
+  # theta<1.0: partial pass-through (e.g. insurance, resilience investment)
+  theta:
+    baseline: 1.0
+    sensitivity_values: [0.5, 0.75, 1.0]
+
+  capital_ratio: 0.08   # Basel III minimum Tier 1 + Tier 2
+
+  n_simulations: 10000
+  random_seed: 42
