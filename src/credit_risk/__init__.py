@@ -1,1 +1,0 @@
-# Credit risk transmission module
